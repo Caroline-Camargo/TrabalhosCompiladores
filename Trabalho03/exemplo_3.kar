@@ -1,0 +1,35 @@
+void main() {
+    newVar float a;
+    newVar float b;
+    
+    a = 10.5;
+    b = 20.3;
+
+    b = add(a, b);
+    printOut b;
+
+    b = sub(a, b);
+    printOut b;
+
+    b = div(a, b);
+    printOut b;
+
+    b = mult(a, b);
+    printOut b;
+}
+
+fun float add(float x, float y) {
+    return (x + y);
+}
+
+fun float sub(float x, float y) {
+    return (x - y);
+}
+
+fun float div(float x, float y) {
+    return (x / y);
+}
+
+fun float mult(float x, float y) {
+    return (x * y);
+}

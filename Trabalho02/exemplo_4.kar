@@ -1,0 +1,11 @@
+void main() {
+    newVar float a;
+
+    a = 1.0;
+    if (a < 10) then {
+        while (a < 10.0) {
+            printOut a;
+            a = (a + 1.0);
+        };
+    };
+}

@@ -1,0 +1,103 @@
+PARSER_BEGIN(Karloff)
+import java.io.*;
+
+public class Karloff {
+  public static void main(String args[]) throws ParseException,IOException {
+    Karloff analisador = new Karloff(new FileInputStream(args[0]));
+    analisador.Karloff();
+  }
+}
+
+PARSER_END(Karloff)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  <MAIN: "main">
+| <VOID: "void">
+| <ACHAVES: "{">
+| <FCHAVES: "}">
+| <APARENTESES: "(">
+| <FPARENTESES: ")">
+| <TIPO_FLOAT: "float">
+| <TIPO_BOOLEAN: "boolean">
+| <VARIAVEL: "newVar">
+| <PONTOEVIRGULA: ";">
+| <IGUAL: "=">
+| <IF: "if">
+| <THEM: "them">
+| <WHILE: "while">
+| <RETURN: "return">
+| <PRINT: "printOut">
+| <VERDADEIRO: "true">
+| <FALSO: "false">
+| <SOMA: "+">
+| <SUBTRACAO: "-">
+| <DIVISAO: "/">
+| <MULTIPLICACAO: "*">
+| <AND: "&">
+| <OR: "|">
+| <MENOR: "<">
+| <MAIOR: ">">
+| <FUNCAO: "fun">
+| <IGUAL_IGUAL: "==">
+| <VIRGULA: ",">
+| <INPUT: "readInput">
+}
+
+
+TOKEN :
+{
+  <NUM : (["0"-"9"]) + ("." (["0"-"9"])+)? ("E" (["+","-"])? (["0"-"9"])+)?>
+| < ID: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* ("_" (["a"-"z","A"-"Z","0"-"9"])+)*>
+}
+
+
+void Karloff () :
+{Token t;}
+{
+
+(
+  <MAIN> { System.out.println("Palavra reservada: main");}
+| <VOID> { System.out.println("Palavra reservada: void");}
+| <ACHAVES> { System.out.println("Abre chaves: {");}
+| <FCHAVES> { System.out.println("Fecha chaves: }");}
+| <APARENTESES> { System.out.println("Abre parenteses: (");}
+| <FPARENTESES> { System.out.println("Fecha parenteses: )");}
+| <TIPO_FLOAT> { System.out.println("Tipo float: float");}
+| <TIPO_BOOLEAN> { System.out.println("Tipo booleano: bool");}
+| <VARIAVEL> { System.out.println("Nova Variável: newVar");}
+| <PONTOEVIRGULA> { System.out.println("Ponto e vírgula: ;");}
+| <IGUAL> { System.out.println("Igual: =");}
+| <IF> { System.out.println("Condição se: if");}
+| <THEM> { System.out.println("Senão: them");}
+| <WHILE> { System.out.println("Enquanto: while");}
+| <RETURN> { System.out.println("Retorno: return");}
+| <PRINT> { System.out.println("Mostrar na tela: print");}
+| <VERDADEIRO> { System.out.println("Verdadeiro: true");}
+| <FALSO> { System.out.println("Falso: false");}
+| <SOMA> { System.out.println("Soma: +");}
+| <SUBTRACAO> { System.out.println("Subtração: -");}
+| <DIVISAO> { System.out.println("Divisão: /");}
+| <MULTIPLICACAO> { System.out.println("Multiplicação: *");}
+| <AND> { System.out.println("And: &");}
+| <OR> { System.out.println("Or: |");}
+| <MENOR> { System.out.println("Menor: <");}
+| <MAIOR> { System.out.println("Maior: >");}
+| <FUNCAO> { System.out.println("Função: func");}
+| <IGUAL_IGUAL> { System.out.println("Igual Igual: ==");}
+| <VIRGULA> { System.out.println("Virgula: ,");}
+| <INPUT> { System.out.println("Input: readInput");}
+
+| t=<NUM> { System.out.println("Número: "+ t.image);}
+| t=<ID> { System.out.println("Identificador: "+ t.image);}
+)*
+<EOF>
+}

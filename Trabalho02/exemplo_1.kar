@@ -1,0 +1,5 @@
+void main () {
+newVar float teste;
+teste = 9.0;
+printOut teste;
+}

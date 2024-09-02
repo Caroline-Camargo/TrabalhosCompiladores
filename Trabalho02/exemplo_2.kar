@@ -1,0 +1,33 @@
+void main() {
+    newVar float a;
+    newVar float b;
+
+    a = 10.5;
+    b = 20.3;
+
+    if (a < b) then {
+        printOut a;
+    };
+
+    if (a > b) then {
+        printOut b;
+    };
+
+    if (a == b) then {
+        printOut 0;
+    };
+
+    if (true & false) then {
+        printOut 1;
+    };
+
+    if (true | false) then {
+        printOut 1;
+    };
+
+    a = 1.0;
+    while (a < 10.0) {
+	printOut a;
+	a = (a + 1.0);
+    };
+}
