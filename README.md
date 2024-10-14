@@ -110,6 +110,9 @@ mesma linguagem no trabalho anterior. Lembrando que o Javacc não aceita recurs�
 #### Descrição 
 O objetivo do trabalho é implementar um compilador para a Linguagem Karloff, usando tradução dirigida por sintaxe, na ferramenta Javacc. Para realizar esta tarefa, o aluno deve adicionar ações semânticas às regras sintáticas já implementadas em Javacc, para que seja gerada uma árvore sintática do programa Karloff sendo compilado. Em seguida, o programa deve percorrer a árvore sintática gerando código (em qualquer linguagem), semanticamente equivalente ao código Karloff original.
 
+> Linguagem utilizada para geração do código final: python
+
+
 Classes a serem usadas para a árvore sintática:
 
     classe Prog: representa um programa. Possuí dois atributos: main (o programa principal) e fun (um array de definições de funções)
