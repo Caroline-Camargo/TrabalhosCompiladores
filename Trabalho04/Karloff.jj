@@ -1,0 +1,371 @@
+PARSER_BEGIN(Karloff)
+import ast.*;
+import java.io.*;
+import java.util.ArrayList;
+
+public class Karloff {
+
+  public static void main(String args[]) throws ParseException,IOException {
+    Karloff parser = new Karloff(new FileInputStream(args[0]));
+    Prog arvore = parser.Karloff();
+    geraCodigo(arvore, args[0]);
+  }
+
+  // reimprime o programa de entrada em outra linguagem e exporta para um novo arquivo
+  public static void geraCodigo(Prog arvore, String nomeArquivo) throws IOException {
+    System.out.println(arvore.toString());
+    
+    String nomeArquivoPy = nomeArquivo.replace(".kar", ".py");
+    FileWriter writer = new FileWriter(nomeArquivoPy);
+
+    try { // Escreve o código gerado no novo arquivo
+        writer.write(arvore.toString());
+    } finally {
+        writer.close();
+    }
+  }
+}
+
+PARSER_END(Karloff)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  <MAIN: "main">
+| <VOID: "void">
+| <ACHAVES: "{">
+| <FCHAVES: "}">
+| <APARENTESES: "(">
+| <FPARENTESES: ")">
+| <NOVAVARIAVEL: "newVar">
+| <PONTOEVIRGULA: ";">
+| <TIPOFLOAT: "float">
+| <TIPOBOOLEAN: "boolean">
+| <ATRIBUICAO: "=">
+| <PRINT: "printOut">
+| <IF: "if">
+| <THEN: "then">
+| <WHILE: "while">
+| <RETURN: "return">
+| <TRUE: "true">
+| <FALSE: "false">
+| <SOMA: "+">
+| <SUBTRACAO: "-">
+| <MULTIPLICACAO: "*">
+| <DIVISAO: "/">
+| <ELOGICO: "&">
+| <OULOGICO: "|">
+| <MAIOR: ">">
+| <MENOR: "<">
+| <IGUAL: "==">
+| <VIRGULA: ",">
+| <FUN: "fun">
+| <READINPUT: "readInput">
+}
+
+TOKEN :
+{
+  <NUM : (["0"-"9"])+ ("." (["0"-"9"])+)? ("E" (["+","-"])? (["0"-"9"])+)?>
+ |< ID: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9"])* ("_" (["a"-"z","A"-"Z","0"-"9"])+)*>
+}
+
+
+// KARLOFF -> MAIN FUNC?
+// classe Prog: representa um programa. Possuí dois atributos: main (o programa principal) e fun (um array de definições de funções)
+Prog Karloff () :
+{ Main main = null;
+  ArrayList<Fun> funs = new ArrayList<Fun>();
+}
+{
+  (main=Main() (funs=Func())?)
+  
+  { return new Prog(main, funs); }
+}
+
+
+// MAIN -> "void" "main" "(" ")" "{" VARDECL SEQCOMANDOS "}"
+// classe Main: representa o main de um programa. Possuí dois atributos vars (um array de declaração de variáveis) e coms (um array de comandos)
+Main Main () :
+{
+  ArrayList<VarDecl> vars = new ArrayList<VarDecl>();
+  ArrayList<Comando> coms = new ArrayList<Comando>();
+}
+{
+ (<VOID> <MAIN> <APARENTESES> <FPARENTESES> <ACHAVES> vars=Vardecl() coms=Seqcomandos() <FCHAVES>)
+ { return new Main(vars, coms); }
+}
+
+
+// VARDECL -> "newVar" TIPO TOKEN_id ";" *
+// classe VarDecl: representa uma declaração de variável. Possuí dois atributos type (o tipo da variável) e var (a variável sendo declarada)
+ArrayList<VarDecl> Vardecl  () :
+{
+  String type = new String();
+  Token var = null;
+  ArrayList<VarDecl> vars = new ArrayList<VarDecl>();
+}
+{
+ ((<NOVAVARIAVEL> type=Tipo() var=Tokenid() <PONTOEVIRGULA> { vars.add(new VarDecl(type, var.image)); })*)
+
+  { return vars; }
+}
+
+
+// TIPO -> "float" | "boolean" | "void"
+String Tipo  () :
+{
+  String result = new String();
+}
+{
+ (<TIPOFLOAT> { result = "float"; } | 
+ <TIPOBOOLEAN>  { result = "boolean"; } | 
+ <VOID> { result = "void"; })
+
+ { return result; }
+}
+
+
+// SEQCOMANDOS -> COMANDO *
+ArrayList<Comando> Seqcomandos  () :
+{
+  Comando c = null; ArrayList<Comando> coms = new ArrayList<Comando>();
+}
+{
+ ((c=Comando() { coms.add(c); })*)
+
+ { return coms; }
+}
+
+
+// COMANDO -> TOKEN_id COMANDO’
+//  | "if" EXP "then" "{" SEQCOMANDOS "}" ";"
+//  | "while" EXP "{" SEQCOMANDOS "}" ";"
+//  | "return" EXP ";"
+//  | "printOut" EXP ";"
+// classe Comando: superclasse de todos os comandos
+
+// classe CIf: representa o comando if. Possuí dois atributos: exp (representa a expressão booleana) e bloco (um array de comandos representando o bloco do then)
+// classe CWhile: representa o comando while. Possuí 2 atributos: exp que é a expressão booleana do while e bloco que é o bloco a ser executado pelo while (um ArrayList de comandos)
+// classe CReturn: representa o comando return. Possuí 1 atributo exp que é a expressão sendo retornada
+// classe CPrint: representa o comando de imprimir na saída padrão. Possuí 1 atributo exp, que é a expressão a ser imprimida na tela
+
+Comando Comando  () :
+{
+  Exp exp = null;
+  ArrayList<Comando> bloco = new ArrayList<Comando>();
+  Comando result = null;
+  Token var = null;
+}
+{
+ ((var=Tokenid() result=ComandoL(var)) |
+ (<IF> exp=Exp() <THEN> <ACHAVES> bloco=Seqcomandos() <FCHAVES> <PONTOEVIRGULA> { result = new CIf(token.beginLine, exp, bloco); }) |
+ (<WHILE> exp=Exp() <ACHAVES> bloco=Seqcomandos() <FCHAVES> <PONTOEVIRGULA> { result = new CWhile(token.beginLine, exp, bloco); }) |
+ (<RETURN> exp=Exp() <PONTOEVIRGULA> { result = new CReturn(token.beginLine, exp); }) |
+ (<PRINT> exp=Exp() <PONTOEVIRGULA> { result = new CPrint(token.beginLine, exp); }))
+
+  { return result; }
+}
+
+
+// COMANDO’ -> "=" COMANDO’’ | "(" LISTAEXP? ")" ";"
+// classe CAtribuicao: representa o comando de atribuição. Possuí dois atributos: var a variável sendo atribuída e exp a expressão sendo atribuída a variável)
+// classe CChamadaFun: representa uma chamada de função. Possuí dois atributos: fun (a função sendo chamada) e args (os argumentos a serem passados para a função)
+Comando ComandoL (Token id) :
+{
+  ArrayList<Exp> args = new ArrayList<Exp>();
+  Comando result = null;
+}
+{
+ ((<ATRIBUICAO> result=ComandoLL(id)) |
+ (<APARENTESES> (args=Listaexp())? <FPARENTESES> <PONTOEVIRGULA> { result = new CChamadaFun(token.beginLine, id.image, args); }))
+
+ { return result; }
+}
+
+
+// COMANDO’’ -> EXP ";" | readInput "(" ")"
+Comando ComandoLL (Token id) :
+{
+  Exp exp = null;
+  Comando result = null;
+}
+{
+ ((exp=Exp() <PONTOEVIRGULA> { result = new CAtribuicao(token.beginLine, id.image, exp); }) |
+ (<READINPUT> <APARENTESES>  <FPARENTESES> { result = new CReadInput(token.beginLine, id.image); }))
+
+ { return result; }
+}
+
+
+// EXP -> "(" EXP OP EXP ")" | FATOR
+// classe EOpExp: representa uma expressão que é uma operação usando uma operador. Possuí 3 atributos: op (o operador), arg1 (o primeiro argumento) e arg2 (o segundo argumento)
+Exp Exp () :
+{
+  String op = new String();
+  Exp arg1 = null;
+  Exp arg2 = null;
+  Exp result = null;
+}
+{
+ ((<APARENTESES> arg1=Exp() op=Op() arg2=Exp() <FPARENTESES> { result = new EOpExp(op, arg1, arg2); }) |
+ (result=Fator()))
+
+ { return result; }
+}
+
+
+// FATOR -> TOKEN_id FATOR’ | TOKEN_numliteral | "true" | "false"
+// classe EChamadaFun: representa uma expressão que é uma chamada de função. Possuí dois atributos: fun (a função sendo chamada) e args (que são os argumentos sendo passados para função)
+// classe EFloat: representa uma expressão que é um float. Possuí um atributo value que é o valor do float
+// classe EFalse: representa uma expressão que é o valor false
+// classe ETrue: representa uma expressão que é o valor true
+Exp Fator  () :
+{
+  Token fun = null;
+  Exp result = null;
+}
+{
+ ((fun=Tokenid() result=FatorL(fun.image)) |
+ result=Tokennumliteral() |
+ <TRUE> { result = new ETrue(); } |
+ <FALSE> { result = new EFalse(); })
+
+ { return result; }
+}
+
+
+// FATOR’ -> "(" LISTAEXP? ")" | epsilon
+Exp FatorL  (String fun) :
+{
+  ArrayList<Exp> args = new ArrayList<Exp>();
+}
+{
+ ((<APARENTESES> (args=Listaexp())? <FPARENTESES> { return new EChamadaFun(fun, args); })?)
+
+ { return new EVar(fun); }
+}
+
+
+// OP -> "+" | "-" | "*" | "/" | "&" | "|" | "<" | ">" | "=="
+String Op  () :
+{
+  String result = new String();
+}
+{
+ (<SOMA> { result = "+"; } |
+ <SUBTRACAO> { result = "-"; } |
+ <MULTIPLICACAO> { result = "*"; } |
+ <DIVISAO> { result = "/"; } |
+ <ELOGICO> { result = "&"; } |
+ <OULOGICO> { result = "|"; } |
+ <MAIOR> { result = ">"; } |
+ <MENOR> { result = "<"; } |
+ <IGUAL> { result = "=="; })
+
+ { return result; }
+}
+
+
+// LISTAEXP -> EXP LISTAEXP’
+ArrayList<Exp> Listaexp  () :
+{
+  Exp exp = null;
+  ArrayList<Exp> exps = new ArrayList<Exp>();
+}
+{
+ (exp=Exp() { exps.add(exp); } exps=ListaexpL(exps))
+ 
+ { return exps; }
+}
+
+//LISTAEXP’ -> "," EXP LISTAEXP’ | epsilon
+ArrayList<Exp> ListaexpL  (ArrayList<Exp> exps) :
+{
+  Exp exp = null;
+}
+{
+ ((<VIRGULA> exp=Exp() { exps.add(exp); } exps=ListaexpL(exps))?)
+
+  { return exps; }
+}
+
+
+// FUNC -> "fun" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"  FUNC’
+// FUNC’ -> "fun" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}"  FUNC’|  epsilon
+
+// ---> NEW: FUNC -> ("fun" TIPO TOKEN_id "(" LISTAARG? ")" "{" VARDECL SEQCOMANDOS "}" ) +
+// classe Fun: representa uma função. Possuí 5 atributos: nome (o nome da função), params (um array list com os parâmetros declarados para a função), retorno (o tipo de retorno da função), vars (as variáveis declaradas no corpo da função) e body (o corpo da função)
+ArrayList<Fun> Func  () :
+{
+  Token nome = null;
+  ArrayList<ParamFormalFun> params = new ArrayList<ParamFormalFun>();
+  String retorno = new String();
+  ArrayList<VarDecl> vars = new ArrayList<VarDecl>();
+  ArrayList<Comando> body = new ArrayList<Comando>();
+  ArrayList<Fun> funs = new ArrayList<Fun>();
+}
+{
+  ((<FUN> retorno=Tipo() nome=Tokenid() <APARENTESES> (params=Listaarg())? <FPARENTESES>
+  <ACHAVES> vars=Vardecl() body=Seqcomandos() <FCHAVES> { funs.add(new Fun(nome.image, params, retorno, vars, body)); })+)
+
+  { return funs; }
+ 
+}
+
+
+// LISTAARG -> TIPO TOKEN_id LISTAARG’
+ArrayList<ParamFormalFun> Listaarg  () :
+{
+  String type = new String();
+  Token var = null;
+  ArrayList<ParamFormalFun> params = new ArrayList<ParamFormalFun>();
+}
+{
+  (type=Tipo() var=Tokenid() { params.add(new ParamFormalFun(type, var.image)); } params=ListaargL(params))
+
+  { return params; }
+}
+
+
+// LISTAARG’ -> "," TIPO TOKEN_id LISTAARG’ |  epsilon
+ArrayList<ParamFormalFun> ListaargL  (ArrayList<ParamFormalFun> params) :
+{
+  String type = new String();
+  Token var = null;
+}
+{
+ ((<VIRGULA> type=Tipo() var=Tokenid() { params.add(new ParamFormalFun(type, var.image)); } params=ListaargL(params))?)
+
+  { return params; }
+}
+
+
+// TOKEN_id -> letra letraoudigito* finalsublinhado*
+Token Tokenid  () :
+{
+  Token var = null;
+}
+{
+ (var=<ID>)
+
+ { return var; }
+}
+
+
+// TOKEN_numliteral -> digitos facao_opcional expoente_opcional
+EFloat Tokennumliteral  () :
+{
+  Token value = null;
+}
+{
+ (value=<NUM>)
+
+ { return new EFloat(Float.parseFloat(value.image)); }
+}

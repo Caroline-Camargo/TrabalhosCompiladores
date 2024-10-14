@@ -1,0 +1,36 @@
+void main() {
+    newVar float peso;
+    newVar float altura;
+    newVar float result_imc;
+
+    peso = 37.0;
+    altura = 1.68;
+
+    result_imc = div(peso, mult(altura, altura));
+    printOut result_imc;
+
+    if (result_imc < 18.5) then {
+        printOut 0;
+    };
+
+    if (((result_imc == 18.5) | (result_imc > 18.5)) & (result_imc < 25.0)) then {
+        printOut 1;
+    };
+
+    if (((result_imc == 25.0) | (result_imc > 25.0)) & (result_imc < 30.0)) then {
+        printOut 2;
+    };
+
+    if ((result_imc == 30.0) | (result_imc > 30.0)) then {
+        printOut 3;
+    };
+
+}
+
+fun float div(float x, float y) {
+    return (x / y);
+}
+
+fun float mult(float x, float y) {
+    return (x * y);
+}

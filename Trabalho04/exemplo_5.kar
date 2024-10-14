@@ -1,0 +1,27 @@
+void main() {
+    newVar float num;
+    newVar float num2;
+
+    num = readInput()
+    num2 = num;
+
+    while (num > 0) {
+        printOut num;
+        num = sub(num, 1);
+    };
+
+    if (num2 < 0) then {
+        while (num2 < 0) {
+            printOut num2;
+            num = add(num2, 1);
+        };
+    };
+}
+
+fun float sub(float x, float y) {
+    return (x - y);
+}
+
+fun float add(float x, float y) {
+    return (x + y);
+}
