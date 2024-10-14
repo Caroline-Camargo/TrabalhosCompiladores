@@ -106,8 +106,52 @@ mesma linguagem no trabalho anterior. Lembrando que o Javacc não aceita recurs�
 
     TOKEN_numliteral -> digitos facao_opcional expoente_opcional
 
+## Trabalho 3
+#### Descrição 
+O objetivo do trabalho é implementar um compilador para a Linguagem Karloff, usando tradução dirigida por sintaxe, na ferramenta Javacc. Para realizar esta tarefa, o aluno deve adicionar ações semânticas às regras sintáticas já implementadas em Javacc, para que seja gerada uma árvore sintática do programa Karloff sendo compilado. Em seguida, o programa deve percorrer a árvore sintática gerando código (em qualquer linguagem), semanticamente equivalente ao código Karloff original.
 
-### Executando Trabalho 2 e 3
+Classes a serem usadas para a árvore sintática:
+
+    classe Prog: representa um programa. Possuí dois atributos: main (o programa principal) e fun (um array de definições de funções)
+    
+    classe Main: representa o main de um programa. Possuí dois atributos vars (um array de declaração de variáveis) e coms (um array de comandos)
+    
+    classe VarDecl: representa uma declaração de variável. Possuí dois atributos type (o tipo da variável) e var (a variável sendo declarada)
+    
+    classe Comando: superclasse de todos os comandos
+    
+    classe CAtribuicao: representa o comando de atribuição. Possuí dois atributos: var a variável sendo atribuída e exp a expressão sendo atribuída a variável)
+    
+    classe CChamadaFun: representa uma chamada de função. Possuí dois atributos: fun (a função sendo chamada) e args (os argumentos a serem passados para a função)
+    
+    classe CIf: representa o comando if. Possuí dois atributos: exp (representa a expressão booleana) e bloco (um array de comandos representando o bloco do then)
+    
+    classe CPrint: representa o comando de imprimir na saída padrão. Possuí 1 atributo exp, que é a expressão a ser imprimida na tela
+    
+    classe CReadInput: representa o comando para ler da entrada padrão. Possuí 1 atributo var que é a variável onde será atribuido o valor lido
+    
+    classe CReturn: representa o comando return. Possuí 1 atributo exp que é a expressão sendo retornada classe CWhile: representa o comando while. Possuí 2 atributos: exp que é a expressão booleana do while e bloco que é o bloco a ser executado pelo while (um ArrayList de comandos)
+    
+    classe Exp: superclasse de todas as expressões
+    
+    classe EChamadaFun: representa uma expressão que é uma chamada de função. Possuí dois atributos: fun (a função sendo chamada) e args (que são os argumentos sendo passados para função)
+    
+    classe EFalse: representa uma expressão que é o valor false
+    
+    Classe ETrue: representa uma expressão que é o valor true
+    
+    classe EFloat: representa uma expressão que é um float. Possuí um atributo value que é o valor do float
+    
+    classe EOpExp: representa uma expressão que é uma operação usando uma operador. Possuí 3 atributos: op (o operador), arg1 (o primeiro argumento) e arg2 (o segundo argumento)
+    
+    classe EVar: representa uma expressão que é uma variável. Possuí 1 atributo var, a variável
+    
+    classe Fun: representa uma função. Possuí 5 atributos: nome (o nome da função), params (um array list com os parâmetros declarados para a função), retorno (o tipo de retorno da função), vars (as variáveis declaradas no corpo da função) e body (o corpo da função)
+    
+    classe ParamFormalFun: contém a declaração de 1 parâmetro de uma função. Possuí 2 atributos var (o nome da variável) e type (o tipo da variável)
+
+
+### Executando Trabalho 2, 3 e 4
 
 *OBS*: Executar comandos dentro da pasta do Karloff
 
